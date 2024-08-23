@@ -54,19 +54,19 @@ public class CsvImporter {
                     return 0;
                 }
                 long fileid = jdbcImporter.addMeta(con, filemeta);
-                logger.info("Importing {} {} with fileid={}", filemeta.path(), filemeta.filename(), fileid);
+                logger.info("'{}' fileid:{}", filemeta.getFullFilename(), fileid);
                 long imported = 0;
                 try {
                     LocalDateTime start1 = LocalDateTime.now();
                     imported = importCsvFile(in, jdbcImporter, con, fileid);
-                    logger.info("{} Duration {}", fileid, JavaTimeFormatter.durationPrinterHuman(start1, LocalDateTime.now()));
+                    logger.info("'{}' duration:{}", filemeta.getFullFilename(), JavaTimeFormatter.durationPrinterHuman(start1, LocalDateTime.now()));
                 } catch (IOException e) {
-                    logger.warn("{} {} {}", filemeta.path(), filemeta.filename(), e.getMessage());
+                    logger.warn("{} {}", filemeta.getFullFilename(), e.getMessage());
                 }
                 return imported;
             });
 
-            logger.info("Complete-Import duration {}", JavaTimeFormatter.durationPrinterHuman(start, LocalDateTime.now()));
+            logger.info("Complete-Import Duration {}", JavaTimeFormatter.durationPrinterHuman(start, LocalDateTime.now()));
             return rowcount;
         }
     }

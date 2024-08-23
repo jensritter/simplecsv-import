@@ -56,7 +56,7 @@ public class FileContentReaderZip implements FileContentReader {
 
     private long parseZip(FileMeta fileMeta, InputStream in, FoundFileEvent finder) throws SQLException {
 
-        String zipfile = fileMeta.path() + "!" + fileMeta.filename();
+        String zipfile = fileMeta.getFullFilename();
 
         long rowcount = 0;
         try (ZipInputStream zip = new ZipInputStream(in)) {
