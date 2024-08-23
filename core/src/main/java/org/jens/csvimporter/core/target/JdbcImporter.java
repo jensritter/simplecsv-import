@@ -67,19 +67,10 @@ public class JdbcImporter {
         }
     }
 
-    String appendColumn(Table table, String columnName) throws SQLException {
-        var sql = MyTemplator.template("alter table ${TBL} add ${COL} varchar(8000);");
-        sql.param("TBL", ng.escapeTable(table.schema()) + "." + ng.escapeTable(table.name()));
+    String appendColumn(Table table, String columnName) {
+        var sql = MyTemplator.template("alter table ${TBL} add ${COL} varchar(8000)");
+        sql.param("TBL", MetaTableService.escapeTable(ng, table));
         sql.param("COL", ng.escapeColumn(columnName));
-
-//        switch (ng.getType()) {
-//            case H2:
-//            case POSTGRES:
-//            case MS:
-//                break;
-//            default:
-//                throw new IllegalStateException("unimplemented: ");
-//        }
         return sql.toString();
     }
 

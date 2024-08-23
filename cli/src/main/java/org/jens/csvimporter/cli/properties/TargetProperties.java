@@ -15,4 +15,11 @@ public class TargetProperties extends JdbcNGConnectionProperty {
     public DbType getType() {return type;}
 
     public void setType(DbType type) {this.type = type;}
+
+    @Override
+    public String toString() {
+        return "TargetProperties{" +
+               "type=" + type +
+               "} " + super.toString();
+    }
 }

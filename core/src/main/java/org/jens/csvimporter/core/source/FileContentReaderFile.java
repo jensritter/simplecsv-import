@@ -39,7 +39,7 @@ public class FileContentReaderFile implements FileContentReader {
                 var modifed = attrs.lastModifiedTime();
                 var ldtModified = JavaTimeHelper.filetime2LocalDateTime(modifed);
 
-                try (InputStream fis = new FileInputStream(file);) {
+                try (InputStream fis = new FileInputStream(file)) {
 
                     var rows = finder.onFile(
                         new FileMeta(dir, name, ldtModified),
@@ -53,7 +53,7 @@ public class FileContentReaderFile implements FileContentReader {
             }
 
             @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            public FileVisitResult visitFileFailed(Path file, IOException exc) {
                 logger.warn("{} {}", file.toString(), exc.getMessage());
                 return FileVisitResult.CONTINUE;
             }

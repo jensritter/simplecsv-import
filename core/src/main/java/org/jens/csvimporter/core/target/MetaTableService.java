@@ -4,9 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jens.csvimporter.core.FileMeta;
 import org.jens.shorthand.jdbc.ng.JdbcNG;
 import org.jens.shorthand.jdbc.ng.Table;
+import org.jens.shorthand.jdbc.ng.treiber.DbType;
 import org.jens.shorthand.stringutils.JavaTimeHelper;
 import org.jens.shorthand.stringutils.MyTemplator;
 
+import java.io.File;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,7 +75,7 @@ class MetaTableService {
     long addMeta(Connection con, FileMeta fileMeta) throws SQLException {
         long max = -1;
         MyTemplator queryMax = MyTemplator.template("select max(${ID}) from ${TBL}")
-            .param("TBL", escapeTable(meta))
+            .param("TBL", escapeTable(ng, meta))
             .param("ID", ng.escapeColumn("id"));
 
         try (PreparedStatement pst = con.prepareStatement(queryMax.get())) {
@@ -85,7 +87,7 @@ class MetaTableService {
         MyTemplator insert = MyTemplator.template(
                 "insert into ${TBL} (${ID},${PATH},${FILENAME},${FILEDATE},${IMPORTED}) values(?,?,?,?,?)"
             )
-            .param("TBL", escapeTable(meta))
+            .param("TBL", escapeTable(ng, meta))
             .param("ID", ng.escapeColumn("id"))
             .param("PATH", ng.escapeColumn("path"))
             .param("FILENAME", ng.escapeColumn("filename"))
@@ -103,12 +105,21 @@ class MetaTableService {
         }
     }
 
-    String escapeTable(Table someTable) {
-        return ng.escapeTable(someTable.schema()) + "." + ng.escapeTable(someTable.name());
+    static String escapeTable(JdbcNG jdbcNG, Table someTable) {
+        if (someTable.schema() != null) {
+            return jdbcNG.escapeTable(someTable.schema()) + "." + jdbcNG.escapeTable(someTable.name());
+        } else {
+            return jdbcNG.escapeTable(someTable.name());
+        }
     }
 
     Optional<Table> findTableByName(Connection con, String tableName) throws SQLException {
-        var tmp = this.ng.getMeta().getAllTables(con, ng.getDb());
+        String dbName = ng.getDb();
+        if (ng.getType() == DbType.H2FILE) {
+            String filenameOnly = new File(dbName).getName();
+            dbName = filenameOnly.toUpperCase(Locale.ROOT);
+        }
+        var tmp = this.ng.getMeta().getAllTables(con, dbName);
         List<Table> list = tmp
             .stream()
             .filter(it->it.name().toLowerCase(Locale.ROOT).equals(tableName.toLowerCase(Locale.ROOT)))
@@ -127,7 +138,5 @@ class MetaTableService {
         return list.stream().filter(it->it.schema().toLowerCase(Locale.ROOT).equals(schema)).findAny();
     }
 
-    Table getTableContent() {
-        return this.content;
-    }
+    Table getTableContent() {return this.content;}
 }

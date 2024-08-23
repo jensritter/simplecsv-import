@@ -39,16 +39,15 @@ public class FileContentReaderZip implements FileContentReader {
         return plain.walk(base, (meta, in)->{
             if (isZipFile(meta.filename())) {
                 return parseZip(meta, in, finder);
-            } else {
-                if (filesAlso) {
-                    if (isCsvFile(meta.filename())) {
-                        return finder.onFile(meta, in);
-                    } else {
-                        logger.info("Ignoring Non-Csv '{}'", meta.getFullFilename());
-                    }
+            }
+            if (filesAlso) {
+                if (isCsvFile(meta.filename())) {
+                    return finder.onFile(meta, in);
                 } else {
-                    logger.debug("Ignoring Non-Zip '{}'", meta.getFullFilename());
+                    logger.info("Ignoring Non-Csv '{}'", meta.getFullFilename());
                 }
+            } else {
+                logger.debug("Ignoring Non-Zip '{}'", meta.getFullFilename());
             }
             return 0;
         });
@@ -70,7 +69,7 @@ public class FileContentReaderZip implements FileContentReader {
                     logger.debug("{}: {} {} {}", fileMeta.path(), name, cmt, timeLocal);
                 }
                 if (isCsvFile(name)) {
-                    try (InputStream zipInput = CloseShieldInputStream.wrap(zip);) {
+                    try (InputStream zipInput = CloseShieldInputStream.wrap(zip)) {
                         rowcount += finder.onFile(new FileMeta(zipfile, name, fileMeta.modifed()), zipInput);
                     } catch (IOException e) {
                         logger.error("{}!{} : {}", zipfile, name, e.getMessage(), e);

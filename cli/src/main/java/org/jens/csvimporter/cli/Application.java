@@ -21,6 +21,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Jens Ritter on 23.08.2024.
@@ -48,12 +50,26 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        logger.info("Programm-Arguments : {}", args);
+        var argv = args.getSourceArgs();
+        logger.info("ARGV {}", Arrays.asList(argv));
         logger.info("{}", sourceProperties);
         logger.info("{}", targetProperties);
 
+        List<String> nonOptionArgs = args.getNonOptionArgs();
+        Path sourcePath;
+        if (!nonOptionArgs.isEmpty()) {
+            if (nonOptionArgs.size() != 1) {
+                this.exitCode = 255;
+                logger.error("Multiple Input-Verzeichnisse sind nicht unterstützt.");
+                return;
+            }
+            sourcePath = Path.of(nonOptionArgs.get(0));
+        } else {
+            sourcePath = Path.of(sourceProperties.getDirname());
+        }
+
+
         FileContentReader csvReader = fileWalkerFactory.createFileWalker(sourceProperties.isHandleZip());
-        Path sourcePath = Path.of(sourceProperties.getDirname());
         if (!Files.exists(sourcePath)) {
             logger.error("'{}' nicht vorhanden.", sourcePath);
             exitCode = 255;
@@ -69,6 +85,7 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
         integerInstance.setGroupingUsed(true);
         integerInstance.setMinimumFractionDigits(0);
         logger.info("{} rows inserted", integerInstance.format(rowcount));
+        this.exitCode = 0;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class FlexiblePst {
     private final PreparedStatement pst;
     private final int columns;
 
-    private int batchCounter = 0;
+    private int batchCounter;
 
     FlexiblePst(JdbcNG ng, Connection con, long fileid, int columnCount, Table table) throws SQLException {
         this.columns = columnCount;
@@ -28,7 +28,7 @@ public class FlexiblePst {
 
     private static String insert(JdbcNG ng, Table table, long fileid, int columnCount) {
         var sql = MyTemplator.template("insert into ${TBL} (${FIELDS}) values(${FILEID}, ${Q})");
-        sql.param("TBL", ng.escapeTable(table.schema()) + "." + ng.escapeTable(table.name()));
+        sql.param("TBL", MetaTableService.escapeTable(ng, table));
         sql.param("FILEID", fileid);
 
         Collection<String> insertFields = new ArrayList<>();
