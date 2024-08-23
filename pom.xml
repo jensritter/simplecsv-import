@@ -14,6 +14,27 @@
     <artifactId>simplecsv-import</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <scm>
+        <url>https://github.com/jensritter/simplecsv-import</url>
+        <connection>scm:git:https://github.com/jensritter/simplecsv-import.git</connection>
+        <developerConnection>scm:git:git@github.com:jensritter/simplecsv-import.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <url>https://github.com/jensritter/simplecsv-import/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+
     <modules>
         <module>core</module>
         <module>cli</module>
