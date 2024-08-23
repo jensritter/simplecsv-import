@@ -4,6 +4,6 @@
 | |___ ___) |\ V /    | || |  | |  __/| |_| |  _ < | |
  \____|____/  \_/    |___|_|  |_|_|    \___/|_| \_\|_|
 
-${application.title} ${application.version}
+${spring.application.name} ${application.version}
 Powered by Spring Boot ${spring-boot.version}
-Created by Jens Ritter
+Created by Jens Ritter, 2024
