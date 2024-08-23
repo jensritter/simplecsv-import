@@ -1,0 +1,9 @@
+  ____ ______     __  ___ __  __ ____   ___  ____ _____
+ / ___/ ___\ \   / / |_ _|  \/  |  _ \ / _ \|  _ \_   _|
+| |   \___ \\ \ / /   | || |\/| | |_) | | | | |_) || |
+| |___ ___) |\ V /    | || |  | |  __/| |_| |  _ < | |
+ \____|____/  \_/    |___|_|  |_|_|    \___/|_| \_\|_|
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
+Created by Jens Ritter
