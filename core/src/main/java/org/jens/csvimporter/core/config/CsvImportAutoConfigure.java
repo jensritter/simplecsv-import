@@ -5,7 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 @Configuration
 @ComponentScan(basePackageClasses=CsvImporter.class)

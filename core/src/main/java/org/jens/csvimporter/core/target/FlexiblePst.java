@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 public class FlexiblePst {
 
@@ -51,6 +51,7 @@ public class FlexiblePst {
     }
 
     public void addLine(int lineCount, Collection<String> line) throws SQLException {
+
         int counter = 1;
         pst.setInt(counter++, lineCount);
         for (String s : line) {

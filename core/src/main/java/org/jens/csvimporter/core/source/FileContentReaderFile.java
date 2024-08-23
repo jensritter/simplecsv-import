@@ -8,26 +8,27 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
-public class CsvImportServiceFile implements CsvImportService {
+public class FileContentReaderFile implements FileContentReader {
 
-    private final Logger logger = LoggerFactory.getLogger(CsvImportServiceFile.class);
+    private final Logger logger = LoggerFactory.getLogger(FileContentReaderFile.class);
 
     @Override
-    public int walk(Path base, OnFoundFile finder) throws IOException {
+    public long walk(Path base, FoundFileEvent finder) throws IOException {
 
-        AtomicInteger fileCounter = new AtomicInteger(0);
-        Files.walkFileTree(base, new SimpleFileVisitor<Path>() {
+        AtomicLong fileCounter = new AtomicLong(0);
+        Files.walkFileTree(base, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
                 File file = path.toFile();
@@ -38,12 +39,13 @@ public class CsvImportServiceFile implements CsvImportService {
                 var modifed = attrs.lastModifiedTime();
                 var ldtModified = JavaTimeHelper.filetime2LocalDateTime(modifed);
 
-                try (FileInputStream fis = new FileInputStream(file);) {
-                    fileCounter.incrementAndGet();
-                    finder.onFile(
+                try (InputStream fis = new FileInputStream(file);) {
+
+                    var rows = finder.onFile(
                         new FileMeta(dir, name, ldtModified),
                         fis
                     );
+                    fileCounter.addAndGet(rows);
                     return FileVisitResult.CONTINUE;
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -56,6 +58,6 @@ public class CsvImportServiceFile implements CsvImportService {
                 return FileVisitResult.CONTINUE;
             }
         });
-        return fileCounter.intValue();
+        return fileCounter.longValue();
     }
 }

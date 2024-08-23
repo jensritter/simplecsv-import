@@ -3,8 +3,8 @@ package org.jens.csvimporter.cli;
 import org.jens.csvimporter.cli.properties.SourceProperties;
 import org.jens.csvimporter.cli.properties.TargetProperties;
 import org.jens.csvimporter.core.CsvImporter;
-import org.jens.csvimporter.core.source.CsvImportService;
-import org.jens.csvimporter.core.source.SourceFactory;
+import org.jens.csvimporter.core.source.FileContentReader;
+import org.jens.csvimporter.core.source.FileWalkerFactory;
 import org.jens.csvimporter.core.target.JdbcImporter;
 import org.jens.shorthand.jdbc.ng.JdbcNG;
 import org.jens.shorthand.spring.boot.HostnameAwareSpringApplicationBuilder;
@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 @SpringBootApplication
 @EnableConfigurationProperties({SourceProperties.class, TargetProperties.class})
@@ -42,7 +42,7 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
     private TargetProperties targetProperties;
 
     @Autowired
-    private SourceFactory sourceFactory;
+    private FileWalkerFactory fileWalkerFactory;
 
     private int exitCode = 1;
 
@@ -52,7 +52,7 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
         logger.info("{}", sourceProperties);
         logger.info("{}", targetProperties);
 
-        CsvImportService importer = sourceFactory.createFileImporter(sourceProperties.isHandleZip());
+        FileContentReader csvReader = fileWalkerFactory.createFileWalker(sourceProperties.isHandleZip());
         Path sourcePath = Path.of(sourceProperties.getDirname());
         if (!Files.exists(sourcePath)) {
             logger.error("'{}' nicht vorhanden.", sourcePath);
@@ -60,14 +60,14 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
             return;
         }
 
-
         final JdbcNG ng = buildNg();
-        JdbcImporter jdbcImporter = new JdbcImporter(ng);
+        var jdbcImporter = new JdbcImporter(ng);
         var csvImporter = new CsvImporter(';');
-        int rowcount = csvImporter.doImport(sourcePath, importer, jdbcImporter);
+        long rowcount = csvImporter.doImport(sourcePath, csvReader, jdbcImporter);
 
-        NumberFormat integerInstance = NumberFormat.getIntegerInstance();
+        NumberFormat integerInstance = NumberFormat.getNumberInstance();
         integerInstance.setGroupingUsed(true);
+        integerInstance.setMinimumFractionDigits(0);
         logger.info("{} rows inserted", integerInstance.format(rowcount));
     }
 

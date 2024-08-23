@@ -14,17 +14,17 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * Erstellt, und verwaltet die SQL-Tabellen 'filemeta' und 'content'
+ *
+ * @author Jens Ritter on 23.08.2024.
  */
 class MetaTableService {
     private final JdbcNG ng;
 
-    static final String TABLE_META = "filemeta";
-    static final String TABLE_CONTENT = "content";
+    private static final String TABLE_META = "filemeta";
+    private static final String TABLE_CONTENT = "content";
 
-    MetaTableService(JdbcNG ng) {
-        this.ng = ng;
-    }
+    MetaTableService(JdbcNG ng) {this.ng = ng;}
 
     private Table meta;
     private Table content;
@@ -33,7 +33,9 @@ class MetaTableService {
         Optional<Table> tableByName = findTableByName(con, TABLE_META);
         if (tableByName.isEmpty()) {
             try (Statement stm = con.createStatement()) {
-                var sql = MyTemplator.template("create table ${TBL} (${ID} int primary key not null, ${PATH} varchar(500), ${FILENAME} varchar(500), ${FILEDATE} ${dt}, ${IMPORTED} ${dt})");
+                var sql = MyTemplator.template(
+                    "create table ${TBL} (${ID} int primary key not null, ${PATH} varchar(500), ${FILENAME} varchar(500), ${FILEDATE} ${dt}, ${IMPORTED} ${dt})"
+                );
                 sql.param("TBL", ng.escapeTable(TABLE_META))
                     .param("ID", ng.escapeColumn("id"))
                     .param("PATH", ng.escapeColumn("path"))
@@ -125,8 +127,7 @@ class MetaTableService {
         return list.stream().filter(it->it.schema().toLowerCase(Locale.ROOT).equals(schema)).findAny();
     }
 
-
-    public Table getContentTable() {
+    Table getTableContent() {
         return this.content;
     }
 }

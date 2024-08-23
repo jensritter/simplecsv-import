@@ -2,7 +2,7 @@ package org.jens.csvimporter.core;
 
 import com.univocity.parsers.common.TextParsingException;
 import com.univocity.parsers.csv.CsvParserSettings;
-import org.jens.csvimporter.core.source.CsvImportService;
+import org.jens.csvimporter.core.source.FileContentReader;
 import org.jens.csvimporter.core.target.FlexiblePst;
 import org.jens.csvimporter.core.target.JdbcImporter;
 import org.jens.shorthand.data.reader.UniCsvReader;
@@ -24,7 +24,11 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * Verbindungs-Haupt-Klasse:
+ * <p>
+ * Holt sich die Dateien vom FileContentReader und lässt den JdbcImporter die Datensätze speichern.
+ *
+ * @author Jens Ritter on 23.08.2024.
  */
 public class CsvImporter {
 
@@ -38,47 +42,46 @@ public class CsvImporter {
         settings.getFormat().setLineSeparator("\n");
     }
 
-    public int doImport(Path sourcePath, CsvImportService importer, JdbcImporter jdbcImporter) throws SQLException, IOException {
+    public long doImport(Path sourcePath, FileContentReader importer, JdbcImporter jdbcImporter) throws SQLException, IOException {
         try (Connection con = jdbcImporter.getCon()) {
 
             var start = LocalDateTime.now();
 
-            int rowcount = importer.walk(sourcePath, (filemeta, in)->{
+            long rowcount = importer.walk(sourcePath, (filemeta, in)->{
                 logger.debug("{} {}", filemeta, in);
-
-                if (filemeta.filename().toLowerCase(Locale.ROOT).endsWith(".csv")) {
-                    long fileid = jdbcImporter.addMeta(con, filemeta);
-
-                    logger.info("Importing {} {} with fileid={}", filemeta.path(), filemeta.filename(), fileid);
-                    try {
-                        LocalDateTime start1 = LocalDateTime.now();
-                        importCsvFile(in, jdbcImporter, con, fileid);
-                        logger.info("{} Duration {}", fileid, JavaTimeFormatter.durationPrinterHuman(start1, LocalDateTime.now()));
-                    } catch (IOException e) {
-                        logger.warn("{} {} {}", filemeta.path(), filemeta.filename(), e.getMessage());
-                    }
-                } else {
+                if (!filemeta.filename().toLowerCase(Locale.ROOT).endsWith(".csv")) {
                     logger.info("Ignoring non-csv file {}{}{}", filemeta.path(), File.separator, filemeta.filename());
+                    return 0;
                 }
+                long fileid = jdbcImporter.addMeta(con, filemeta);
+                logger.info("Importing {} {} with fileid={}", filemeta.path(), filemeta.filename(), fileid);
+                long imported = 0;
+                try {
+                    LocalDateTime start1 = LocalDateTime.now();
+                    imported = importCsvFile(in, jdbcImporter, con, fileid);
+                    logger.info("{} Duration {}", fileid, JavaTimeFormatter.durationPrinterHuman(start1, LocalDateTime.now()));
+                } catch (IOException e) {
+                    logger.warn("{} {} {}", filemeta.path(), filemeta.filename(), e.getMessage());
+                }
+                return imported;
             });
 
             logger.info("Complete-Import duration {}", JavaTimeFormatter.durationPrinterHuman(start, LocalDateTime.now()));
             return rowcount;
         }
-
     }
 
-    private int importCsvFile(InputStream in, JdbcImporter importer, Connection con, long fileid) throws IOException, SQLException {
-
-        BufferedReader bufferedReader = EncodingGuesserReader.guessReader(in);
-        AtomicInteger lineCounter = new AtomicInteger(0);
+    private long importCsvFile(InputStream in, JdbcImporter importer, Connection con, long fileid) throws IOException, SQLException {
 
         int columns = 0;
         FlexiblePst pst = null;
 
-        try (UniCsvReader reader = new UniCsvReader(bufferedReader, settings)) {
+        AtomicInteger lineCounter = new AtomicInteger(0);
+        try (
+            BufferedReader bufferedReader = EncodingGuesserReader.guessReader(in);
+            UniCsvReader reader = new UniCsvReader(bufferedReader, settings)
+        ) {
             List<String> line = reader.getLine();
-
             if (line == null) {
                 logger.info("Skippe Leere Datei");
                 return 0;
@@ -87,6 +90,9 @@ public class CsvImporter {
             do {
                 int lineCount = lineCounter.incrementAndGet();
                 if (pst == null || line.size() > columns) {
+                    if (pst != null) {
+                        logger.info("Anzahl der Spalten hat sich verändert: von {} nach {}", columns, line.size());
+                    }
                     pst = importer.prepareInsert(pst, con, fileid, line.size());
                     columns = line.size();
                 }

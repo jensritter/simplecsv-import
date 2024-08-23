@@ -5,7 +5,7 @@ import org.jens.shorthand.jdbc.ng.treiber.DbType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 @ConfigurationProperties("csvimporter.target")
 public class TargetProperties extends JdbcNGConnectionProperty {

@@ -3,7 +3,7 @@ package org.jens.csvimporter.cli.properties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 @ConfigurationProperties("csvimporter.source")
 public class SourceProperties {

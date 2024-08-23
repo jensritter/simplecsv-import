@@ -6,8 +6,6 @@ import org.jens.shorthand.jdbc.ng.JdbcNG;
 import org.jens.shorthand.jdbc.ng.Table;
 import org.jens.shorthand.stringutils.MyTemplator;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,13 +16,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
- * @author CsvImporter Ritter on 23.08.2024.
+ * @author Jens Ritter on 23.08.2024.
  */
 public class JdbcImporter {
-    private final Logger logger = LoggerFactory.getLogger(JdbcImporter.class);
-
     private final JdbcNG ng;
-
     private final MetaTableService metaTableService;
 
     public JdbcImporter(JdbcNG ng) {
@@ -43,18 +38,11 @@ public class JdbcImporter {
         if (pst != null) {
             pst.close();
         }
-        var contentTable = metaTableService.getContentTable();
+        var contentTable = metaTableService.getTableContent();
         ensureColumns(con, contentTable, size);
-        FlexiblePst flexiblePst = new FlexiblePst(this.ng, con, fileid, size, contentTable);
+        FlexiblePst flexiblePst = new FlexiblePst(ng, con, fileid, size, contentTable);
         return flexiblePst;
     }
-
-
-    public long addMeta(Connection con, FileMeta fileMeta) throws SQLException {
-        long fileid = metaTableService.addMeta(con, fileMeta);
-        return fileid;
-    }
-
 
     void ensureColumns(Connection con, Table tableContent, int csvColumns) throws SQLException {
         Map<String, Column> allColumns = ng.getMeta().getAllColumns(con, tableContent)
@@ -94,5 +82,12 @@ public class JdbcImporter {
 //        }
         return sql.toString();
     }
+
+
+    public long addMeta(Connection con, FileMeta fileMeta) throws SQLException {
+        long fileid = metaTableService.addMeta(con, fileMeta);
+        return fileid;
+    }
+
 
 }
