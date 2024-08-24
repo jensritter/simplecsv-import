@@ -29,8 +29,7 @@ public class JdbcImporter {
 
     public Connection getCon() throws SQLException {
         var con = this.ng.getConnection();
-        metaTableService.prepareMeta(con);
-        metaTableService.prepareContent(con);
+        metaTableService.prepareTables(con);
         return con;
     }
 

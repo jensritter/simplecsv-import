@@ -58,7 +58,7 @@ public class FlexiblePst {
             pst.setString(counter++, s);
         }
         if (line.size() < columns) {
-            for (int i = 0; i <= (columns - line.size()); i++) {
+            for (int i = 0; i < (columns - line.size()); i++) {
                 pst.setString(counter++, null);
             }
         }

@@ -7,6 +7,7 @@ import org.jens.shorthand.jdbc.ng.Table;
 import org.jens.shorthand.jdbc.ng.treiber.DbType;
 import org.jens.shorthand.stringutils.JavaTimeHelper;
 import org.jens.shorthand.stringutils.MyTemplator;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.sql.*;
@@ -23,27 +24,32 @@ import java.util.Optional;
 class MetaTableService {
     private final JdbcNG ng;
 
-    private static final String TABLE_META = "filemeta";
-    private static final String TABLE_CONTENT = "content";
+    static final String TABLE_META = "filemeta";
+    static final String TABLE_CONTENT = "content";
 
-    private final String prefix;
+    private final Optional<String> prefix;
 
-    MetaTableService(JdbcNG ng, String prefix) {
+    MetaTableService(JdbcNG ng, @Nullable String prefix) {
         this.ng = ng;
-        this.prefix = prefix;
+        this.prefix = Optional.ofNullable(prefix);
     }
 
     private Table meta;
-    private Table content;
+    private Table tableContent;
+
+    void prepareTables(Connection con) throws SQLException {
+        this.prepareMeta(con);
+        this.prepareContent(con);
+    }
 
     Table prepareMeta(Connection con) throws SQLException {
-        Optional<Table> tableByName = findTableByName(con, TABLE_META);
+        Optional<Table> tableByName = findTableByName(con, prefix.orElse("") + TABLE_META);
         if (tableByName.isEmpty()) {
             try (Statement stm = con.createStatement()) {
                 var sql = MyTemplator.template(
                     "create table ${TBL} (${ID} int primary key not null, ${PATH} varchar(500), ${FILENAME} varchar(500), ${FILEDATE} ${dt}, ${IMPORTED} ${dt})"
                 );
-                sql.param("TBL", ng.escapeTable(TABLE_META))
+                sql.param("TBL", ng.escapeTable(prefix.orElse("") + TABLE_META))
                     .param("ID", ng.escapeColumn("id"))
                     .param("PATH", ng.escapeColumn("path"))
                     .param("FILENAME", ng.escapeColumn("filename"))
@@ -52,7 +58,7 @@ class MetaTableService {
                     .param("dt", ng.getTimestampType());
                 stm.execute(sql.get());
             }
-            tableByName = findTableByName(con, TABLE_META);
+            tableByName = findTableByName(con, prefix.orElse("") + TABLE_META);
         }
         var result = tableByName.orElseThrow(()->new IllegalStateException("unimplemented: konnte tabelle nicht erstellen ?"));
         this.meta = result;
@@ -60,25 +66,25 @@ class MetaTableService {
     }
 
     Table prepareContent(Connection con) throws SQLException {
-        Optional<Table> tableByName = findTableByName(con, TABLE_CONTENT);
+        Optional<Table> tableByName = findTableByName(con, prefix.orElse("") + TABLE_CONTENT);
         if (tableByName.isEmpty()) {
             try (Statement stm = con.createStatement()) {
                 MyTemplator sql = MyTemplator.template("create table ${TBL}( ${FILEID} int not null, ${LINENR} int not null)")
-                    .param("TBL", ng.escapeTable(TABLE_CONTENT))
+                    .param("TBL", ng.escapeTable(prefix.orElse("") + TABLE_CONTENT))
                     .param("FILEID", ng.escapeColumn("fileid"))
                     .param("LINENR", ng.escapeColumn("linenr"));
 
                 stm.execute(sql.get());
             }
-            tableByName = findTableByName(con, TABLE_CONTENT);
+            tableByName = findTableByName(con, prefix.orElse("") + TABLE_CONTENT);
         }
         var result = tableByName.orElseThrow(()->new IllegalStateException("unimplemented: konnte tabelle nicht erstellen ?"));
-        this.content = result;
+        this.tableContent = result;
         return result;
     }
 
     long addMeta(Connection con, FileMeta fileMeta) throws SQLException {
-        long max = -1;
+        long max;
         MyTemplator queryMax = MyTemplator.template("select max(${ID}) from ${TBL}")
             .param("TBL", escapeTable(ng, meta))
             .param("ID", ng.escapeColumn("id"));
@@ -143,5 +149,5 @@ class MetaTableService {
         return list.stream().filter(it->it.schema().toLowerCase(Locale.ROOT).equals(schema)).findAny();
     }
 
-    Table getTableContent() {return this.content;}
+    Table getTableContent() {return this.tableContent;}
 }

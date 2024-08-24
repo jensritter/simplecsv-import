@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <property name="APP_NAME" value="logfile"/>
+    <appender name="RootConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- verkürzte daarstellung des klassennamens <pattern>%date{HH:mm:ss} [%thread] %-5level %logger{20}\(%line\)%marker %msg%n</pattern> -->
+            <!--<pattern>%date{ISO8601} %-5level %logger\(%line\)%marker %msg%n</pattern> -->
+            <pattern>%date{ISO8601} %-5level %logger\(%line\)%marker %msg%n</pattern> <!-- logging passiert innerhalb von container. container schrebit die zeit -->
+        </encoder>
+    </appender>
+
+    <logger name="org.hibernate.validator" level="WARN"/>
+    <logger name="org.jboss.logging" level="WARN"/>
+
+    <logger name="org.springframework" level="WARN"/>
+
+    <logger name="org.apache.http" level="WARN"/>
+    <logger name="org.apache.catalina" level="WARN"/>
+    <logger name="org.apache.tomcat" level="WARN"/>
+    <logger name="org.apache.coyote" level="WARN"/>
+
+    <logger name="org.thymeleaf" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="RootConsoleAppender"/>
+    </root>
+
+</configuration>
