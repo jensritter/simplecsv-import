@@ -34,7 +34,6 @@ class MetaTableServiceTest extends MySpringRunner {
     @BeforeEach
     void setUp() throws SQLException {
         con = ds.getConnection();
-        logger.info("Setup");
         try (Statement stm = con.createStatement()) {
             var ng = JdbcNG.h2().build();
             for (Table aPublic : ng.getMeta().getAllTables(con, null, "PUBLIC")) {
@@ -46,7 +45,6 @@ class MetaTableServiceTest extends MySpringRunner {
     @AfterEach
     void tearDown() throws SQLException {
         con.close();
-        logger.info("Teardown");
     }
 
     private Connection con;

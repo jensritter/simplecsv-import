@@ -20,6 +20,7 @@
     <logger name="org.apache.coyote" level="WARN"/>
 
     <logger name="org.thymeleaf" level="WARN"/>
+    <logger name="org.jens.shorthand.spring.boot.defaultchecker.BootPropertiesChecker" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="RootConsoleAppender"/>
