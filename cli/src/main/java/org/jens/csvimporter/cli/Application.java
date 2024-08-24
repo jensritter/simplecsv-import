@@ -4,7 +4,7 @@ import org.jens.csvimporter.cli.properties.SourceProperties;
 import org.jens.csvimporter.cli.properties.TargetProperties;
 import org.jens.csvimporter.core.CsvImporter;
 import org.jens.csvimporter.core.source.FileContentReader;
-import org.jens.csvimporter.core.source.FileWalkerFactory;
+import org.jens.csvimporter.core.source.FileContentReaderZip;
 import org.jens.csvimporter.core.target.JdbcImporter;
 import org.jens.shorthand.jdbc.ng.JdbcNG;
 import org.jens.shorthand.spring.boot.HostnameAwareSpringApplicationBuilder;
@@ -43,9 +43,6 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
     @Autowired
     private TargetProperties targetProperties;
 
-    @Autowired
-    private FileWalkerFactory fileWalkerFactory;
-
     private int exitCode = 1;
 
     @Override
@@ -69,7 +66,8 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
         }
 
 
-        FileContentReader csvReader = fileWalkerFactory.createFileWalker(sourceProperties.isHandleZip());
+        boolean onlyZip = sourceProperties.isHandleZip();
+        FileContentReader csvReader = new FileContentReaderZip(onlyZip);
         if (!Files.exists(sourcePath)) {
             logger.error("Basisverzeichnis '{}' nicht vorhanden.", sourcePath);
             exitCode = 255;

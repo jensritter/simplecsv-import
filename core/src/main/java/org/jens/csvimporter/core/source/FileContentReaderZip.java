@@ -15,32 +15,31 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
+ * Durchsucht ein Verzeichnis und alle darin enthaltende .Zip-Dateien nach CSV-Dateien und übergibt diese and den FoundCsvFileEvent
+ *
  * @author Jens Ritter on 23.08.2024.
  */
 public class FileContentReaderZip implements FileContentReader {
     private final Logger logger = LoggerFactory.getLogger(FileContentReaderZip.class);
 
-    private final boolean filesAlso;
+    private final boolean alsoPlainFiles;
 
-    FileContentReaderZip(final boolean onlyZip) {this.filesAlso = !onlyZip;}
+    public FileContentReaderZip(final boolean onlyZip) {this.alsoPlainFiles = !onlyZip;}
 
 
-    private static boolean isZipFile(String filename) {
-        return filename.toLowerCase(Locale.ROOT).endsWith(".zip");
-    }
+    private static boolean isZipFile(String filename) {return filename.toLowerCase(Locale.ROOT).endsWith(".zip");}
 
-    private static boolean isCsvFile(String filename) {
-        return filename.toLowerCase(Locale.ROOT).endsWith(".csv");
-    }
+    private static boolean isCsvFile(String filename) {return filename.toLowerCase(Locale.ROOT).endsWith(".csv");}
 
     @Override
-    public long walk(Path base, FoundFileEvent finder) throws IOException {
+    public long walk(Path base, FoundCsvFileEvent finder) throws IOException {
+
         FileContentReader plain = new FileContentReaderFile();
         return plain.walk(base, (meta, in)->{
             if (isZipFile(meta.filename())) {
                 return parseZip(meta, in, finder);
             }
-            if (filesAlso) {
+            if (alsoPlainFiles) {
                 if (isCsvFile(meta.filename())) {
                     return finder.onFile(meta, in);
                 } else {
@@ -53,8 +52,7 @@ public class FileContentReaderZip implements FileContentReader {
         });
     }
 
-    private long parseZip(FileMeta fileMeta, InputStream in, FoundFileEvent finder) throws SQLException {
-
+    private long parseZip(FileMeta fileMeta, InputStream in, FoundCsvFileEvent finder) throws SQLException {
         String zipfile = fileMeta.getFullFilename();
 
         long rowcount = 0;

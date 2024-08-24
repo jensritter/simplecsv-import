@@ -8,5 +8,5 @@ import java.nio.file.Path;
  */
 @FunctionalInterface
 public interface FileContentReader {
-    long walk(Path base, FoundFileEvent finder) throws IOException;
+    long walk(Path base, FoundCsvFileEvent finder) throws IOException;
 }

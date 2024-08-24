@@ -11,6 +11,6 @@ import java.sql.SQLException;
  */
 @FunctionalInterface
 public
-interface FoundFileEvent {
+interface FoundCsvFileEvent {
     long onFile(FileMeta filemeta, InputStream in) throws SQLException, IOException;
 }

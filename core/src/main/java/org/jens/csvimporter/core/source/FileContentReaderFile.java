@@ -18,17 +18,20 @@ import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * Durchsucht einfach nur ein Verzeichnis, öffnet alle Dateien zum Lesen, und übergibt dies an die FoundCsvFileEvent-Methode
+ *
  * @author Jens Ritter on 23.08.2024.
  */
-public class FileContentReaderFile implements FileContentReader {
+class FileContentReaderFile implements FileContentReader {
 
     private final Logger logger = LoggerFactory.getLogger(FileContentReaderFile.class);
 
     @Override
-    public long walk(Path base, FoundFileEvent finder) throws IOException {
+    public long walk(Path base, FoundCsvFileEvent finder) throws IOException {
 
         AtomicLong fileCounter = new AtomicLong(0);
         Files.walkFileTree(base, new SimpleFileVisitor<>() {
+
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
                 File file = path.toFile();
@@ -40,7 +43,6 @@ public class FileContentReaderFile implements FileContentReader {
                 var ldtModified = JavaTimeHelper.filetime2LocalDateTime(modifed);
 
                 try (InputStream fis = new FileInputStream(file)) {
-
                     var rows = finder.onFile(
                         new FileMeta(dir, name, ldtModified),
                         fis

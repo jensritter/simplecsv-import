@@ -6,6 +6,7 @@ import org.jens.shorthand.jdbc.ng.JdbcNG;
 import org.jens.shorthand.jdbc.ng.Table;
 import org.jens.shorthand.stringutils.MyTemplator;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,6 +26,12 @@ public class JdbcImporter {
     public JdbcImporter(JdbcNG ng, String prefix) {
         this.ng = ng;
         this.metaTableService = new MetaTableService(ng, prefix);
+    }
+
+    @TestOnly
+    JdbcImporter(MetaTableService metaTableService) {
+        this.ng = null;
+        this.metaTableService = metaTableService;
     }
 
     public Connection getCon() throws SQLException {
