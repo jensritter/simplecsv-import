@@ -26,7 +26,12 @@ class MetaTableService {
     private static final String TABLE_META = "filemeta";
     private static final String TABLE_CONTENT = "content";
 
-    MetaTableService(JdbcNG ng) {this.ng = ng;}
+    private final String prefix;
+
+    MetaTableService(JdbcNG ng, String prefix) {
+        this.ng = ng;
+        this.prefix = prefix;
+    }
 
     private Table meta;
     private Table content;

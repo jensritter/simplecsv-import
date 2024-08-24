@@ -12,14 +12,21 @@ public class TargetProperties extends JdbcNGConnectionProperty {
 
     private DbType type = DbType.H2;
 
+    private String prefix = "JENS";
+
     public DbType getType() {return type;}
 
     public void setType(DbType type) {this.type = type;}
+
+    public String getPrefix() {return prefix;}
+
+    public void setPrefix(String prefix) {this.prefix = prefix;}
 
     @Override
     public String toString() {
         return "TargetProperties{" +
                "type=" + type +
+               ", prefix='" + prefix + '\'' +
                "} " + super.toString();
     }
 }

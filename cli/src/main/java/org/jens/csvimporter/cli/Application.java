@@ -71,14 +71,14 @@ public class Application implements ApplicationRunner, ExitCodeGenerator {
 
         FileContentReader csvReader = fileWalkerFactory.createFileWalker(sourceProperties.isHandleZip());
         if (!Files.exists(sourcePath)) {
-            logger.error("'{}' nicht vorhanden.", sourcePath);
+            logger.error("Basisverzeichnis '{}' nicht vorhanden.", sourcePath);
             exitCode = 255;
             return;
         }
 
         final JdbcNG ng = buildNg();
-        var jdbcImporter = new JdbcImporter(ng);
-        var csvImporter = new CsvImporter(';');
+        var jdbcImporter = new JdbcImporter(ng, targetProperties.getPrefix());
+        var csvImporter = new CsvImporter(sourceProperties.getCsvdelimiter());
         long rowcount = csvImporter.doImport(sourcePath, csvReader, jdbcImporter);
 
         NumberFormat integerInstance = NumberFormat.getNumberInstance();

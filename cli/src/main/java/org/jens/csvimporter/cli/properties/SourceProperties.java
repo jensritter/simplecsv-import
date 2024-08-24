@@ -11,6 +11,8 @@ public class SourceProperties {
 
     private boolean handleZip = true;
 
+    private char csvdelimiter = ',';
+
     public String getDirname() {return dirname;}
 
     public void setDirname(String dirname) {this.dirname = dirname;}
@@ -19,11 +21,16 @@ public class SourceProperties {
 
     public void setHandleZip(boolean handleZip) {this.handleZip = handleZip;}
 
+    public char getCsvdelimiter() {return csvdelimiter;}
+
+    public void setCsvdelimiter(char csvdelimiter) {this.csvdelimiter = csvdelimiter;}
+
     @Override
     public String toString() {
         return "SourceProperties{" +
                "dirname='" + dirname + '\'' +
                ", handleZip=" + handleZip +
+               ", csvdelimiter=" + csvdelimiter +
                '}';
     }
 }

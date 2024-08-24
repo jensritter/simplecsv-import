@@ -22,9 +22,9 @@ public class JdbcImporter {
     private final JdbcNG ng;
     private final MetaTableService metaTableService;
 
-    public JdbcImporter(JdbcNG ng) {
+    public JdbcImporter(JdbcNG ng, String prefix) {
         this.ng = ng;
-        this.metaTableService = new MetaTableService(ng);
+        this.metaTableService = new MetaTableService(ng, prefix);
     }
 
     public Connection getCon() throws SQLException {
