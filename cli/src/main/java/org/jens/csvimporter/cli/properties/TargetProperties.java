@@ -5,14 +5,22 @@ import org.jens.shorthand.jdbc.ng.treiber.DbType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Optionen für die Zieldatenbank.
+ *
  * @author Jens Ritter on 23.08.2024.
  */
-@ConfigurationProperties("csvimporter.target")
+@ConfigurationProperties("target")
 public class TargetProperties extends JdbcNGConnectionProperty {
 
-    private DbType type = DbType.H2;
+    /**
+     * Datenbank Type
+     */
+    private DbType type;
 
-    private String prefix = "JENS";
+    /**
+     * Prefix für den erstellen Tabellen
+     */
+    private String prefix;
 
     public DbType getType() {return type;}
 
