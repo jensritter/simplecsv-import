@@ -37,4 +37,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-application-host-acht.properties
+application-host-*.properties
